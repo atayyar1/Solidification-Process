@@ -9,11 +9,15 @@ from pycuda.compiler import SourceModule
 dx = dy = 0.025
 nx = ny = 500
 
-dt = 5e-4
-steps = 10000
-
 tau = 3e-4
 kappa = 2.25
+
+# compute a stable time step (CFL condition)
+dt_diff = 0.25 * dx * dx / kappa
+dt_react = 0.5 * tau
+dt = 0.9 * min(dt_diff, dt_react)
+# number of iterations to run
+steps = 10000
 
 zeta = 0.02
 aniso = 6.0
@@ -54,6 +58,10 @@ for j in range(ny):
         x = (i - nx/2) * dx
         r = np.hypot(x, y)
         phi_host[j, i] = 0.5 * (1.0 - np.tanh((r - r0) / width))
+
+# small random perturbation to break symmetry
+phi_host += 1e-4 * np.random.randn(*shape)
+np.clip(phi_host, 0.0, 1.0, out=phi_host)
 
 # -------------------------------
 # CUDA kernels
@@ -260,4 +268,7 @@ drv.memcpy_dtoh(phi_result, phi)
 drv.memcpy_dtoh(temp_result, temp)
 
 print("phi min/max:", phi_result.min(), phi_result.max())
+print("phi mean:", phi_result.mean())
+center = phi_result[ny//2-2:ny//2+3, nx//2-2:nx//2+3]
+print("center phi values:\n", center)
 print("temp min/max:", temp_result.min(), temp_result.max())

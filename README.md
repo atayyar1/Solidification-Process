@@ -19,4 +19,4 @@ Execute the script directly after installing the dependencies and ensuring a CUD
 python anisotropic_dendrite_solver.py
 ```
 
-The program initializes a circular solid seed and evolves the Allen–Cahn phase–field equation coupled to a heat equation. When finished it prints the minimum and maximum values of the phase and temperature fields.
+The solver initializes a circular solid seed with a small random perturbation and automatically chooses a stable time step based on the grid spacing and material parameters. When finished it prints the minimum, maximum and mean values of the phase field along with a small center slice.
